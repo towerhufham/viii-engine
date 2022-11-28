@@ -58,14 +58,44 @@ const createScene = function (engine: BABYLON.Engine, canvas: HTMLCanvasElement)
     // sphere.position.y = 1
 
     const sm = new BABYLON.SpriteManager("Squall Manager", "src/img/squall-idle.png", 1, {width: 61, height: 77}, scene)
+    const sm2 = new BABYLON.SpriteManager("Squall Attack Manager", "src/img/squall-attack.png", 1, {width: 155, height: 115}, scene)
     const squall = new BABYLON.Sprite("Squall", sm)
     squall.width = (61 * 3) / 100
     squall.height = (77 * 3) / 100
     squall.position.y = 1
+    squall.position.x = 3
     squall.playAnimation(0, 3, true, 150)
 
+    const pillarMaterial = new BABYLON.StandardMaterial("Pillar", scene)
+    pillarMaterial.diffuseTexture = new BABYLON.Texture("src/img/pillar.png", scene)
+
+    const leftWall = BABYLON.MeshBuilder.CreateBox("Left Box", {size: 2})
+    leftWall.material = pillarMaterial
+    leftWall.position.x = -3
+    leftWall.position.y = -1
+
+    const rightWall = BABYLON.MeshBuilder.CreateBox("Right Box", {size: 2})
+    rightWall.material = pillarMaterial
+    rightWall.position.x = 3
+    rightWall.position.y = -1
+
     // Our built-in 'ground' shape.
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene)
+    // const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene)
+
+    scene.onKeyboardObservable.add((kbInfo) => {
+        if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN) {
+            if (kbInfo.event.key === " ") {
+                squall.isVisible = false
+                const squall2 = new BABYLON.Sprite("Squall Attack", sm2)
+                squall2.width = (155 * 3) / 100
+                squall2.height = (115 * 3) / 100
+                squall2.position.y = 1
+                squall2.position.x = 3 - 1
+                squall2.playAnimation(0, 11, false, 80)
+            }
+        }
+    })
+
 
     return scene
 };
