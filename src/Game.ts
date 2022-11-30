@@ -1,4 +1,12 @@
-interface StatArray {
+import * as BABYLON from 'babylonjs'
+
+export type Stat = "HP" | "STR" |
+            "VIT" | "MAG" |
+            "SPR" | "SPD" |
+            "EVA" | "HIT" | 
+            "LUCK"
+
+export interface StatArray {
     HP: number,
     STR: number, 
     VIT: number,
@@ -10,18 +18,19 @@ interface StatArray {
     LUCK: number
 }
 
-type Stat = "HP" | "STR" |
-            "VIT" | "MAG" |
-            "SPR" | "SPD" |
-            "EVA" | "HIT" | 
-            "LUCK"
-
-interface GFLevelUpReward {
+export interface GFLevelUpReward {
     level: number,
     reward: (gf: GF) => void 
 }
 
-class GF {
+export interface IHealthExperience {
+    exp: number,
+    level: number,
+    maxHP: number,
+    currentHP: number
+}
+
+export class GF implements IHealthExperience {
     name: string
     exp: number = 0
     level: number = 1
@@ -37,7 +46,7 @@ class GF {
     }
 }
 
-class Magic {
+export class Magic {
     name: string
     use?: (state: GameState) => void
     power: number = 1
@@ -50,24 +59,24 @@ class Magic {
     }
 }
 
-interface AmountOfItem {
+export interface AmountOfItem {
     item: Item
     amount: number
 }
 
-interface AmountOfMagic {
+export interface AmountOfMagic {
     magic: Magic
     amount: number
 }
 
-interface Refine {
+export interface Refine {
     ability: string
     amount: number
     // inputs: AmountOfItem[]
     outputs: (AmountOfItem|AmountOfMagic)[]
 }
 
-class Item {
+export class Item {
     name: string
     use?: (state: GameState) => void
     refines: Refine[] = []
@@ -78,14 +87,15 @@ class Item {
     }
 }
 
-interface Drop {
+export interface Drop {
     chance: number
     drops: (AmountOfItem|AmountOfMagic)[]
 }
 
-class Monster {
+export class Monster implements IHealthExperience {
     name: string
-    exp: number = 1
+    exp: number = 0
+    level: number = 1
     currentHP: number = 100
     maxHP: number = 100
     stats: StatArray
@@ -99,28 +109,39 @@ class Monster {
     }
 }
 
-type Direction = "Up" | "Down" | "Left" | "Right"
+export type Direction = "Up" | "Down" | "Left" | "Right"
 
-interface EncounterChance {
+export interface EncounterChance {
     chance: number
     monster: Monster
 }
 
-class Terrain {
+export class Terrain {
     name: string
+    texture: string
     elevation: number
     encounters: EncounterChance[]
     passable: boolean
+    material: BABYLON.Material
 
-    constructor(name: string, elevation: number, encounters: EncounterChance[], passable: boolean = true ) {
+    constructor(name: string, texture: string, elevation: number, encounters: EncounterChance[], scene: BABYLON.Scene, passable: boolean = true ) {
         this.name = name
+        this.texture = texture
         this.elevation = elevation
         this.encounters = encounters
         this.passable = passable
+        this.material = this.buildMaterial(texture, scene)
     }
+
+    buildMaterial(texture: string, scene: BABYLON.Scene) {
+        const mat = new BABYLON.StandardMaterial(this.name, scene)
+        mat.diffuseTexture = new BABYLON.Texture(texture, scene)
+        return mat
+    }
+
 }
 
-class Exit {
+export class Exit {
     x: number
     y: number
     to: Overworld
@@ -139,7 +160,7 @@ class Exit {
 //todo: interface like "IOverworldObject" which is just sprite / x / y and put it on Exit and GameState
 //also IBattler, IUsable (items and mag)
 
-class Overworld {
+export class Overworld {
     name: string
     map: Terrain[][]
     exits: Exit[]
@@ -151,9 +172,9 @@ class Overworld {
     }
 }
 
-type GameMode = "Start Menu" | "Pause Menu" | "Overworld" | "Battle" | "Multi Monad"
+export type GameMode = "Start Menu" | "Pause Menu" | "Overworld" | "Battle" | "Multi Monad"
 
-class GameState {
+export class GameState implements IHealthExperience {
     //overall
     fileName: string = "(No Name)"
 
