@@ -100,20 +100,55 @@ const createScene = function (engine: BABYLON.Engine, canvas: HTMLCanvasElement)
     const grass = new game.Terrain("Grass", "src/img/pillar.png", 0, [], scene)
     const tallGrass = new game.Terrain("Grass", "src/img/pillar.png", 0.1, [], scene)
     const ow = new game.Overworld("Test", [
-        [grass, grass, grass],
-        [grass, tallGrass, grass],
-        [grass, grass, grass]
+        [grass],
     ], [])
 
-    ow.map.forEach((row, j) => {
-        row.forEach((terrain, i) => {
-            const tile = BABYLON.MeshBuilder.CreateGround("Overworld Tile", {width: 1, height: 1}, scene)
-            tile.material = terrain.material
-            tile.position.x = i * 1.1
-            tile.position.y = terrain.elevation
-            tile.position.z = j * 1.1
-        })
-    })
+    // ow.map.forEach((row, j) => {
+    //     row.forEach((terrain, i) => {
+    //         const tile = BABYLON.MeshBuilder.CreateGround("Overworld Tile", {width: 1, height: 1}, scene)
+    //         tile.material = terrain.material
+    //         tile.position.x = i * 1.1
+    //         tile.position.y = terrain.elevation
+    //         tile.position.z = j * 1.1
+    //         tile.setVerticesData(BABYLON.VertexBuffer.PositionKind, [
+    //             Math.random() - 2,
+    //             Math.random(),
+    //             Math.random() + 2,
+                
+    //             Math.random() + 2,
+    //             Math.random(),
+    //             Math.random() + 2,
+
+    //             Math.random() + 2,
+    //             Math.random(),
+    //             Math.random() - 2,
+
+    //             Math.random() - 2,
+    //             Math.random(),
+    //             Math.random() - 2,
+    //         ])
+    //         console.log(tile.getVerticesData(BABYLON.VertexBuffer.PositionKind))
+    //     })
+    // })
+
+    const refTile = BABYLON.MeshBuilder.CreateGround("Overworld Tile", {width: 1, height: 1}, scene)
+    refTile.position.x = -4
+
+    const tile = new BABYLON.Mesh("custom", scene)
+    const verticies = new BABYLON.VertexData()
+
+    verticies.positions = [
+        0, 0, 0,
+        1, 0, 0,
+        1, 0, 1,
+
+        1, 0, 1,
+        0, 0, 1,
+        0, 0, 0
+    ]
+    verticies.indices = [0, 1, 2, 3, 4, 5]
+
+    verticies.applyToMesh(tile)
 
     return scene
 };
