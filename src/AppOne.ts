@@ -131,24 +131,70 @@ const createScene = function (engine: BABYLON.Engine, canvas: HTMLCanvasElement)
     //     })
     // })
 
+    const makeTileMesh = (x: number, z: number, tl: number, tr: number, bl: number, br: number) => {
+        const verticies = new BABYLON.VertexData()
+        verticies.positions = [
+            1 + x, tr, 1 + z,
+            1 + x, br, 0 + z,
+            0 + x, bl, 0 + z,
+
+            1 + x, tr, 1 + z,
+            0 + x, tl, 1 + z,
+            0 + x, bl, 0 + z,
+        ]
+        verticies.indices = [0, 1, 2, 3, 4, 5]
+        return verticies
+    } 
+    
+    const r = () => Math.random()
+    const heightMap = [
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
+    ]
+
+    for (let j = 0; j < 10; j++) {
+        for (let i = 0; i < 10; i++) {
+            const tile = new BABYLON.Mesh("custom", scene)
+            tile.material = grass.material
+
+            let tl = [heightMap[i][j]]
+            if (j+1 < 10) tl.push(heightMap[i][j+1])
+            if (i-1 >= 0) tl.push(heightMap[i-1][j])
+            if (j+1 < 10 && i-1 >= 0) tl.push(heightMap[i-1][j+1])
+            const tla = tl.reduce((a, b) => a + b) / tl.length
+
+            let tr = [heightMap[i][j]]
+            if (j+1 < 10) tr.push(heightMap[i][j+1])
+            if (i+1 < 10) tr.push(heightMap[i+1][j])
+            if (j+1 < 10 && i+1 < 10) tr.push(heightMap[i+1][j+1])
+            const tra = tr.reduce((a, b) => a + b) / tr.length
+
+            let bl = [heightMap[i][j]]
+            if (j-1 >= 0) bl.push(heightMap[i][j-1])
+            if (i-1 >= 0) bl.push(heightMap[i-1][j])
+            if (j-1 >= 0 && i-1 >= 0) bl.push(heightMap[i-1][j-1])
+            const bla = bl.reduce((a, b) => a + b) / bl.length
+
+            let br = [heightMap[i][j]]
+            if (j-1 >= 0) br.push(heightMap[i][j-1])
+            if (i+1 < 10) br.push(heightMap[i+1][j])
+            if (j-1 >= 0 && i+1 < 10) br.push(heightMap[i+1][j-1])
+            const bra = br.reduce((a, b) => a + b) / br.length
+
+            makeTileMesh(i, j, tla, tra, bla, bra).applyToMesh(tile)
+        }
+    }
+
     const refTile = BABYLON.MeshBuilder.CreateGround("Overworld Tile", {width: 1, height: 1}, scene)
     refTile.position.x = -4
-
-    const tile = new BABYLON.Mesh("custom", scene)
-    const verticies = new BABYLON.VertexData()
-
-    verticies.positions = [
-        0, 0, 0,
-        1, 0, 0,
-        1, 0, 1,
-
-        1, 0, 1,
-        0, 0, 1,
-        0, 0, 0
-    ]
-    verticies.indices = [0, 1, 2, 3, 4, 5]
-
-    verticies.applyToMesh(tile)
 
     return scene
 };
