@@ -135,7 +135,9 @@ export class Terrain {
 
     buildMaterial(texture: string, scene: BABYLON.Scene) {
         const mat = new BABYLON.StandardMaterial(this.name, scene)
-        mat.diffuseTexture = new BABYLON.Texture(texture, scene)
+        const tex = new BABYLON.Texture(texture, scene)
+        mat.diffuseTexture = tex
+        mat.specularTexture = tex
         mat.backFaceCulling = false
         return mat
     }

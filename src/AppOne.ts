@@ -22,7 +22,7 @@ export class AppOne {
     }
 
     run() {
-        this.debug(false);
+        this.debug(true);
         this.engine.runRenderLoop(() => {
             this.scene.render();
         })
@@ -97,11 +97,23 @@ const createScene = function (engine: BABYLON.Engine, canvas: HTMLCanvasElement)
     //     }
     // })
 
-    const grass = new game.Terrain("Grass", "src/img/pillar.png", 0, [], scene)
-    const tallGrass = new game.Terrain("Grass", "src/img/pillar.png", 0.1, [], scene)
-    const ow = new game.Overworld("Test", [
-        [grass],
-    ], [])
+    const grass = new game.Terrain("Grass", "src/img/grass.png", 0, [], scene)
+    const pillar = new game.Terrain("Pillar", "src/img/pillar.png", 0.9, [], scene)
+
+    const terrainGrid = [
+        [grass, grass, grass, grass, grass, pillar, pillar, grass, grass, grass],
+        [grass, pillar, grass, grass, grass, grass, pillar, grass, grass, grass],
+        [grass, grass, grass, grass, grass, grass, pillar, grass, grass, grass],
+        [grass, grass, pillar, pillar, pillar, pillar, pillar, grass, grass, grass],
+        [grass, grass, pillar, grass, pillar, pillar, grass, grass, grass, grass],
+        [pillar, pillar, pillar, grass, pillar, pillar, grass, grass, grass, grass],
+        [grass, grass, grass, grass, grass, grass, pillar, grass, grass, grass],
+        [grass, grass, grass, grass, grass, grass, pillar, grass, grass, grass],
+        [grass, grass, pillar, pillar, grass, grass, pillar, pillar, grass, grass],
+        [grass, grass, grass, grass, grass, grass, grass, grass, grass, grass],
+    ]
+
+    const ow = new game.Overworld("Test", terrainGrid, [])
 
     // ow.map.forEach((row, j) => {
     //     row.forEach((terrain, i) => {
@@ -135,61 +147,61 @@ const createScene = function (engine: BABYLON.Engine, canvas: HTMLCanvasElement)
         const verticies = new BABYLON.VertexData()
         verticies.positions = [
             1 + x, tr, 1 + z,
-            1 + x, br, 0 + z,
             0 + x, bl, 0 + z,
+            1 + x, br, 0 + z,
 
             1 + x, tr, 1 + z,
             0 + x, tl, 1 + z,
             0 + x, bl, 0 + z,
         ]
         verticies.indices = [0, 1, 2, 3, 4, 5]
+        verticies.uvs = [
+            0, 0, 
+            0, 1, 
+            1, 1, 
+
+            1, 0,
+            0, 0,
+            1, 1,
+        ]
+
+        verticies.normals = []
+        BABYLON.VertexData.ComputeNormals(verticies.positions, verticies.indices, verticies.normals)
+
         return verticies
     } 
-    
-    const r = () => Math.random()
-    const heightMap = [
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-        [r(), r(), r(), r(), r(), r(), r(), r(), r(), r()],
-    ]
 
     for (let j = 0; j < 10; j++) {
         for (let i = 0; i < 10; i++) {
-            const tile = new BABYLON.Mesh("custom", scene)
-            tile.material = grass.material
+            const tile = new BABYLON.Mesh("Overworld Tile", scene)
+            tile.material = ow.map[i][j].material
 
-            let tl = [heightMap[i][j]]
-            if (j+1 < 10) tl.push(heightMap[i][j+1])
-            if (i-1 >= 0) tl.push(heightMap[i-1][j])
-            if (j+1 < 10 && i-1 >= 0) tl.push(heightMap[i-1][j+1])
+            let tl = [ow.map[i][j].elevation]
+            if (j+1 < 10) tl.push(ow.map[i][j+1].elevation)
+            if (i-1 >= 0) tl.push(ow.map[i-1][j].elevation)
+            if (j+1 < 10 && i-1 >= 0) tl.push(ow.map[i-1][j+1].elevation)
             const tla = tl.reduce((a, b) => a + b) / tl.length
 
-            let tr = [heightMap[i][j]]
-            if (j+1 < 10) tr.push(heightMap[i][j+1])
-            if (i+1 < 10) tr.push(heightMap[i+1][j])
-            if (j+1 < 10 && i+1 < 10) tr.push(heightMap[i+1][j+1])
+            let tr = [ow.map[i][j].elevation]
+            if (j+1 < 10) tr.push(ow.map[i][j+1].elevation)
+            if (i+1 < 10) tr.push(ow.map[i+1][j].elevation)
+            if (j+1 < 10 && i+1 < 10) tr.push(ow.map[i+1][j+1].elevation)
             const tra = tr.reduce((a, b) => a + b) / tr.length
 
-            let bl = [heightMap[i][j]]
-            if (j-1 >= 0) bl.push(heightMap[i][j-1])
-            if (i-1 >= 0) bl.push(heightMap[i-1][j])
-            if (j-1 >= 0 && i-1 >= 0) bl.push(heightMap[i-1][j-1])
+            let bl = [ow.map[i][j].elevation]
+            if (j-1 >= 0) bl.push(ow.map[i][j-1].elevation)
+            if (i-1 >= 0) bl.push(ow.map[i-1][j].elevation)
+            if (j-1 >= 0 && i-1 >= 0) bl.push(ow.map[i-1][j-1].elevation)
             const bla = bl.reduce((a, b) => a + b) / bl.length
 
-            let br = [heightMap[i][j]]
-            if (j-1 >= 0) br.push(heightMap[i][j-1])
-            if (i+1 < 10) br.push(heightMap[i+1][j])
-            if (j-1 >= 0 && i+1 < 10) br.push(heightMap[i+1][j-1])
+            let br = [ow.map[i][j].elevation]
+            if (j-1 >= 0) br.push(ow.map[i][j-1].elevation)
+            if (i+1 < 10) br.push(ow.map[i+1][j].elevation)
+            if (j-1 >= 0 && i+1 < 10) br.push(ow.map[i+1][j-1].elevation)
             const bra = br.reduce((a, b) => a + b) / br.length
 
-            makeTileMesh(i, j, tla, tra, bla, bra).applyToMesh(tile)
+            const mesh = makeTileMesh(i, j, tla, tra, bla, bra)
+            mesh.applyToMesh(tile)
         }
     }
 
